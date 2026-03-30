@@ -11,6 +11,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.2",
+    "@prisma/adapter-libsql": "^7.6.0",
     "@prisma/client": "^7.6.0",
     "@react-router/node": "7.13.2",
     "@react-router/serve": "7.13.2",
