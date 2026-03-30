@@ -1,15 +1,38 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+:root {
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body:    'Bricolage Grotesque', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --ink:          #27272a;
+  --ink-2:        #52525b;
+  --ink-3:        #a1a1aa;
+  --ink-4:        #e4e4e7;
+  --bg:           #f4f4f5;
+  --surface:      #ffffff;
+  --orange:       #f97316;
+  --orange-dark:  #ea580c;
+  --orange-dim:   #fff7ed;
+  --orange-border:#fed7aa;
+
+  --sh-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --sh-md:  0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --sh-lg:  0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+
+  --r: 6px;
 }
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
+*, *::before, *::after { box-sizing: border-box; }
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
