@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseContent, type SiteContent } from './content'
+import { parseContent } from './content'
 
 const sample = `
 # CWA Calculator — Content
