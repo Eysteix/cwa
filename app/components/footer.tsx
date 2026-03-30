@@ -1,7 +1,11 @@
-import { getContent } from '~/lib/content'
+import type { SiteContent } from '~/lib/content'
 
-export function Footer() {
-  const { site, footerLinks } = getContent()
+interface Props {
+  site: SiteContent['site']
+  footerLinks: SiteContent['footerLinks']
+}
+
+export function Footer({ site, footerLinks }: Props) {
 
   return (
     <footer style={{ background: 'var(--surface)', boxShadow: '0 -1px 0 var(--ink-4)', marginTop: 'auto' }}>
