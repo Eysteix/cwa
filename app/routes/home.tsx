@@ -9,13 +9,14 @@ import { CoursesList } from '~/components/calculator/courses-list'
 import { Results } from '~/components/calculator/results'
 import { Scenarios } from '~/components/calculator/scenarios'
 import { TargetSheet } from '~/components/calculator/target-sheet'
+import { SemesterArchive } from '~/components/calculator/semester-archive'
 import { storage } from '~/lib/storage'
 import { calcResults, calcScenarios } from '~/lib/calculator'
 import { getContent } from '~/lib/content'
 import { auth } from '~/lib/auth'
 import { db } from '~/lib/db'
 import type { Route } from './+types/home'
-import type { StoredStatus, OnboardingData } from '~/lib/storage'
+import type { StoredStatus, OnboardingData, StoredSemester } from '~/lib/storage'
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: 'CWA Calculator' }]
@@ -26,16 +27,17 @@ export async function loader({ request }: Route.LoaderArgs) {
   const session = await auth.api.getSession({ headers: request.headers })
 
   if (!session?.user) {
-    return { content, user: null, academicStatus: null, courses: [] as DbCourse[] }
+    return { content, user: null, academicStatus: null, courses: [] as DbCourse[], semesters: [] as DbSemester[] }
   }
 
   const userId = session.user.id
-  const [academicStatus, courses] = await Promise.all([
+  const [academicStatus, courses, semesters] = await Promise.all([
     db.academicStatus.findUnique({ where: { userId } }),
     db.course.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+    db.semester.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
   ])
 
-  return { content, user: session.user, academicStatus, courses }
+  return { content, user: session.user, academicStatus, courses, semesters }
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -93,6 +95,29 @@ export async function action({ request }: Route.ActionArgs) {
     return { ok: true }
   }
 
+  if (intent === 'archiveSemester') {
+    const label = formData.get('label') as string
+    const coursesJson = formData.get('courses') as string
+    await db.semester.create({ data: { userId, label, courses: coursesJson } })
+    return { ok: true }
+  }
+
+  if (intent === 'deleteSemester') {
+    const id = formData.get('id') as string
+    await db.semester.deleteMany({ where: { id, userId } })
+    return { ok: true }
+  }
+
+  if (intent === 'replaceCoursesFromArchive') {
+    const coursesJson = formData.get('courses') as string
+    const cs = JSON.parse(coursesJson) as Array<{ name: string; credits: number; score: number }>
+    await db.course.deleteMany({ where: { userId } })
+    for (const c of cs) {
+      await db.course.create({ data: { userId, name: c.name, credits: c.credits, score: c.score } })
+    }
+    return { ok: true }
+  }
+
   if (intent === 'importGuest') {
     const statusJson = formData.get('status') as string | null
     const coursesJson = formData.get('courses') as string | null
@@ -127,13 +152,8 @@ export async function action({ request }: Route.ActionArgs) {
   return { error: 'Unknown intent' }
 }
 
-// Shape returned by DB queries (serialized — Dates become strings)
-interface DbCourse {
-  id: string
-  name: string
-  credits: number
-  score: number
-}
+interface DbCourse { id: string; name: string; credits: number; score: number }
+interface DbSemester { id: string; label: string; courses: string; createdAt: Date | string }
 
 interface StoredCourse {
   id: string
@@ -143,18 +163,17 @@ interface StoredCourse {
 }
 
 export default function HomePage() {
-  const { content, user, academicStatus: dbStatus, courses: dbCourses } = useLoaderData<typeof loader>()
+  const { content, user, academicStatus: dbStatus, courses: dbCourses, semesters: dbSemesters } = useLoaderData<typeof loader>()
   const isLoggedIn = !!user
   const fetcher = useFetcher()
   const [targetOpen, setTargetOpen] = useState(false)
 
-  // Migration banner: shown client-side when user just logged in and has localStorage data
   const [showMigration, setShowMigration] = useState(false)
   useEffect(() => {
     if (isLoggedIn && storage.hasAnyData()) setShowMigration(true)
   }, [isLoggedIn])
 
-  // Guest-only local state (unused when logged in)
+  // Guest-only local state
   const [guestStatus, setGuestStatus] = useState<StoredStatus | null>(() =>
     isLoggedIn ? null : storage.getStatus()
   )
@@ -166,8 +185,11 @@ export default function HomePage() {
   const [guestOnboarding, setGuestOnboarding] = useState<OnboardingData | null>(() =>
     isLoggedIn ? null : storage.getOnboarding()
   )
+  const [guestSemesters, setGuestSemesters] = useState<StoredSemester[]>(() =>
+    isLoggedIn ? [] : storage.getSemesters()
+  )
 
-  // Unified views — derived from DB when logged in, from local state when guest
+  // Unified views
   const status: StoredStatus | null = isLoggedIn
     ? dbStatus
       ? { inputMode: dbStatus.inputMode as 'cwa' | 'marks', cwa: dbStatus.cwa, totalMarks: dbStatus.totalMarks, totalCredits: dbStatus.totalCredits }
@@ -180,9 +202,24 @@ export default function HomePage() {
 
   const onboarding: OnboardingData | null = isLoggedIn
     ? dbStatus
-      ? { university: (dbStatus as { university?: string | null }).university ?? '', programme: (dbStatus as { programme?: string | null }).programme ?? '', yearOfStudy: (dbStatus as { yearOfStudy?: number | null }).yearOfStudy ?? null, semester: (dbStatus as { semester?: number | null }).semester ?? null, complete: (dbStatus as { onboardingComplete: boolean }).onboardingComplete }
+      ? {
+          university: (dbStatus as { university?: string | null }).university ?? '',
+          programme: (dbStatus as { programme?: string | null }).programme ?? '',
+          yearOfStudy: (dbStatus as { yearOfStudy?: number | null }).yearOfStudy ?? null,
+          semester: (dbStatus as { semester?: number | null }).semester ?? null,
+          complete: (dbStatus as { onboardingComplete: boolean }).onboardingComplete,
+        }
       : null
     : guestOnboarding
+
+  const semesters: StoredSemester[] = isLoggedIn
+    ? (dbSemesters as DbSemester[]).map(s => ({
+        id: s.id,
+        label: s.label,
+        courses: JSON.parse(s.courses) as StoredSemester['courses'],
+        createdAt: String(s.createdAt),
+      }))
+    : guestSemesters
 
   const showOnboarding = !onboarding?.complete
   const results = status ? calcResults({ totalMarks: status.totalMarks, totalCredits: status.totalCredits }, courses) : null
@@ -240,13 +277,7 @@ export default function HomePage() {
   function handleOnboardingComplete(data: OnboardingData) {
     if (isLoggedIn) {
       fetcher.submit(
-        {
-          intent: 'saveOnboarding',
-          university: data.university,
-          programme: data.programme,
-          yearOfStudy: data.yearOfStudy != null ? String(data.yearOfStudy) : '',
-          semester: data.semester != null ? String(data.semester) : '',
-        },
+        { intent: 'saveOnboarding', university: data.university, programme: data.programme, yearOfStudy: data.yearOfStudy != null ? String(data.yearOfStudy) : '', semester: data.semester != null ? String(data.semester) : '' },
         { method: 'post' }
       )
     } else {
@@ -258,13 +289,47 @@ export default function HomePage() {
   function handleOnboardingSkip() {
     const skipped: OnboardingData = { university: '', programme: '', yearOfStudy: null, semester: null, complete: true }
     if (isLoggedIn) {
-      fetcher.submit(
-        { intent: 'saveOnboarding', university: '', programme: '', yearOfStudy: '', semester: '' },
-        { method: 'post' }
-      )
+      fetcher.submit({ intent: 'saveOnboarding', university: '', programme: '', yearOfStudy: '', semester: '' }, { method: 'post' })
     } else {
       setGuestOnboarding(skipped)
       storage.setOnboarding(skipped)
+    }
+  }
+
+  function handleArchiveSemester(label: string) {
+    const payload = courses.map(c => ({ name: c.name, credits: c.credits, score: c.score }))
+    if (isLoggedIn) {
+      fetcher.submit({ intent: 'archiveSemester', label, courses: JSON.stringify(payload) }, { method: 'post' })
+    } else {
+      const saved = storage.saveSemester(label, payload)
+      setGuestSemesters(prev => [...prev, saved])
+    }
+  }
+
+  function handleLoadSemester(semCourses: StoredSemester['courses']) {
+    const loaded = semCourses.map((c, i) => ({ ...c, id: String(Date.now() + i) }))
+    if (isLoggedIn) {
+      // Replace DB courses: delete all then re-add (done client-side optimistically here;
+      // real persistence happens on any subsequent mutation)
+      fetcher.submit(
+        {
+          intent: 'replaceCoursesFromArchive',
+          courses: JSON.stringify(semCourses),
+        },
+        { method: 'post' }
+      )
+    } else {
+      setGuestCourses(loaded)
+      storage.setCourses(loaded)
+    }
+  }
+
+  function handleDeleteSemester(id: string) {
+    if (isLoggedIn) {
+      fetcher.submit({ intent: 'deleteSemester', id }, { method: 'post' })
+    } else {
+      storage.deleteSemester(id)
+      setGuestSemesters(prev => prev.filter(s => s.id !== id))
     }
   }
 
@@ -273,12 +338,7 @@ export default function HomePage() {
     const coursesData = storage.getCourses()
     const onboardingData = storage.getOnboarding()
     fetcher.submit(
-      {
-        intent: 'importGuest',
-        status: statusData ? JSON.stringify(statusData) : '',
-        courses: JSON.stringify(coursesData),
-        onboarding: onboardingData ? JSON.stringify(onboardingData) : '',
-      },
+      { intent: 'importGuest', status: statusData ? JSON.stringify(statusData) : '', courses: JSON.stringify(coursesData), onboarding: onboardingData ? JSON.stringify(onboardingData) : '' },
       { method: 'post' }
     )
     storage.clear()
@@ -289,9 +349,8 @@ export default function HomePage() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
 
-      {/* Migration banner — guest data available after sign-in */}
       {showMigration && (
-        <div style={{ background: '#fff7ed', borderBottom: '1px solid #fed7aa', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, fontFamily: 'var(--font-body)', fontSize: 13 }}>
+        <div role="alert" style={{ background: '#fff7ed', borderBottom: '1px solid #fed7aa', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, fontFamily: 'var(--font-body)', fontSize: 13, flexWrap: 'wrap' }}>
           <span style={{ color: '#9a3412' }}>You have unsaved guest data. Import it into your account?</span>
           <button
             onClick={handleImportGuest}
@@ -302,55 +361,70 @@ export default function HomePage() {
           <button
             onClick={() => { storage.clear(); setShowMigration(false) }}
             style={{ background: 'none', color: 'var(--ink-3)', border: 'none', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+            aria-label="Discard guest data"
           >
             Discard
           </button>
         </div>
       )}
 
-      {/* Guest nudge — only show before status is saved */}
       {!isLoggedIn && !status && (
-        <div style={{ background: 'var(--orange-dim)', borderBottom: '1px solid var(--orange-border)', padding: '7px 24px', textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: 12, color: '#9a3412' }}>
+        <div style={{ background: 'var(--orange-dim)', borderBottom: '1px solid var(--orange-border)', padding: '7px 24px', textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: 13, color: '#9a3412' }}>
           Sign in to save your progress across devices.{' '}
           <a href="/auth/sign-up" style={{ color: 'var(--orange)', fontWeight: 700, textDecoration: 'none' }}>Create a free account →</a>
         </div>
       )}
 
-      <main style={{ flex: 1, maxWidth: 1000, margin: '0 auto', padding: '28px 24px', width: '100%', display: 'grid', gridTemplateColumns: '380px 1fr', gap: 20, alignItems: 'start' }}>
-        <div>
-          {showOnboarding && (
-            <OnboardingWizard
-              yearOptions={content.onboarding.yearOptions}
-              semesterOptions={content.onboarding.semesterOptions}
-              onComplete={handleOnboardingComplete}
-              onSkip={handleOnboardingSkip}
+      <main className="main-padding" style={{ flex: 1, maxWidth: 1000, margin: '0 auto', padding: '28px 24px', width: '100%' }}>
+        <div className="main-grid">
+          <div>
+            {showOnboarding && (
+              <OnboardingWizard
+                yearOptions={content.onboarding.yearOptions}
+                semesterOptions={content.onboarding.semesterOptions}
+                onComplete={handleOnboardingComplete}
+                onSkip={handleOnboardingSkip}
+              />
+            )}
+            <AcademicStatusCard initial={status} onSave={handleSaveStatus} />
+            {status && <AddCourseCard onAdd={handleAddCourse} />}
+            <SemesterArchive
+              semesters={semesters}
+              onLoad={handleLoadSemester}
+              onDelete={handleDeleteSemester}
+              onArchive={handleArchiveSemester}
+              hasCurrentCourses={courses.length > 0}
             />
-          )}
-          <AcademicStatusCard initial={status} onSave={handleSaveStatus} />
-          {status && <AddCourseCard onAdd={handleAddCourse} />}
-        </div>
+          </div>
 
-        <div>
-          {status && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 16 }}>
-                {[
-                  { val: status.cwa.toFixed(2), lbl: 'CWA', hi: true },
-                  { val: String(status.totalCredits), lbl: 'Credits' },
-                  { val: status.totalMarks.toLocaleString(), lbl: 'Marks' },
-                  { val: String(courses.length), lbl: 'Courses' },
-                ].map(({ val, lbl, hi }) => (
-                  <div key={lbl} style={{ background: hi ? 'var(--ink)' : 'var(--surface)', borderRadius: 'var(--r)', boxShadow: 'var(--sh-sm)', padding: '12px 8px', textAlign: 'center' }}>
-                    <div style={{ fontFamily: 'var(--font-heading)', fontSize: 18, fontWeight: 800, color: hi ? 'var(--orange)' : 'var(--ink)', lineHeight: 1 }}>{val}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.06em', color: hi ? '#71717a' : 'var(--ink-3)', marginTop: 5 }}>{lbl}</div>
-                  </div>
-                ))}
-              </div>
-              <CoursesList courses={courses} onDelete={handleDeleteCourse} onUpdateScore={handleUpdateScore} onOpenTarget={() => setTargetOpen(true)} />
-              {results && <Results results={results} />}
-              {scenarios.length > 0 && <Scenarios scenarios={scenarios} />}
-            </>
-          )}
+          <div>
+            {status && (
+              <>
+                <div className="stats-grid" role="region" aria-label="Academic summary">
+                  {[
+                    { val: status.cwa.toFixed(2), lbl: 'CWA', hi: true },
+                    { val: String(status.totalCredits), lbl: 'Credits' },
+                    { val: status.totalMarks.toLocaleString(), lbl: 'Marks' },
+                    { val: String(courses.length), lbl: 'Courses' },
+                  ].map(({ val, lbl, hi }) => (
+                    <div key={lbl} style={{ background: hi ? 'var(--ink)' : 'var(--surface)', borderRadius: 'var(--r)', boxShadow: 'var(--sh-sm)', padding: '12px 8px', textAlign: 'center' }}>
+                      <div style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 800, color: hi ? 'var(--orange)' : 'var(--ink)', lineHeight: 1 }}>{val}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.06em', color: hi ? '#71717a' : 'var(--ink-3)', marginTop: 5 }}>{lbl}</div>
+                    </div>
+                  ))}
+                </div>
+                <CoursesList
+                  courses={courses}
+                  onDelete={handleDeleteCourse}
+                  onUpdateScore={handleUpdateScore}
+                  onOpenTarget={() => setTargetOpen(true)}
+                  onArchive={courses.length > 0 ? handleArchiveSemester.bind(null, `Semester ${semesters.length + 1}`) : undefined}
+                />
+                {results && <Results results={results} />}
+                {scenarios.length > 0 && <Scenarios scenarios={scenarios} />}
+              </>
+            )}
+          </div>
         </div>
       </main>
 

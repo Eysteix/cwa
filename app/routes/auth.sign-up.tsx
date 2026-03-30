@@ -40,8 +40,8 @@ export default function SignUpPage() {
   const labelStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--ink-3)', display: 'block', marginBottom: 5 }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 520px', minHeight: '100vh' }}>
-      <div style={{ background: '#27272a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48, position: 'relative', overflow: 'hidden', minHeight: '100vh' }}>
+    <div className="auth-grid" style={{ minHeight: '100vh' }}>
+      <div className="auth-left-panel" style={{ background: '#27272a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)', backgroundSize: '32px 32px' }} />
         <Link to="/" style={{ position: 'absolute', top: 28, left: 32, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, zIndex: 2 }}>
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 800, color: 'white' }}>CWA</span>
@@ -56,7 +56,7 @@ export default function SignUpPage() {
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#a1a1aa', marginTop: 10, lineHeight: 1.6 }}>{auth.body}</p>
         </div>
       </div>
-      <div style={{ background: 'var(--surface)', display: 'flex', flexDirection: 'column', padding: '0 56px', justifyContent: 'center', position: 'relative' }}>
+      <div className="auth-right-panel" style={{ background: 'var(--surface)', display: 'flex', flexDirection: 'column', padding: '0 56px', justifyContent: 'center', position: 'relative' }}>
         <Link to="/" style={{ position: 'absolute', top: 28, left: 56, display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 600, fontFamily: 'var(--font-body)', color: 'var(--ink-3)', textDecoration: 'none' }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
           Back to calculator

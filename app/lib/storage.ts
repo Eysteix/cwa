@@ -15,6 +15,13 @@ export interface StoredStatus {
   totalCredits: number
 }
 
+export interface StoredSemester {
+  id: string
+  label: string
+  courses: Array<{ name: string; credits: number; score: number }>
+  createdAt: string
+}
+
 const KEYS = {
   status: 'cwa_status',
   courses: 'cwa_courses',
@@ -59,9 +66,29 @@ export const storage = {
     if (!isBrowser()) return
     localStorage.setItem(KEYS.onboarding, JSON.stringify(data))
   },
+  getSemesters(): StoredSemester[] {
+    if (!isBrowser()) return []
+    try {
+      const raw = localStorage.getItem('cwa_semesters')
+      return raw ? JSON.parse(raw) : []
+    } catch { return [] }
+  },
+  saveSemester(label: string, courses: Array<{ name: string; credits: number; score: number }>): StoredSemester {
+    if (!isBrowser()) return { id: '', label, courses, createdAt: new Date().toISOString() }
+    const entry: StoredSemester = { id: String(Date.now()), label, courses, createdAt: new Date().toISOString() }
+    const existing = this.getSemesters()
+    localStorage.setItem('cwa_semesters', JSON.stringify([...existing, entry]))
+    return entry
+  },
+  deleteSemester(id: string): void {
+    if (!isBrowser()) return
+    const updated = this.getSemesters().filter(s => s.id !== id)
+    localStorage.setItem('cwa_semesters', JSON.stringify(updated))
+  },
   clear(): void {
     if (!isBrowser()) return
     Object.values(KEYS).forEach(k => localStorage.removeItem(k))
+    localStorage.removeItem('cwa_semesters')
   },
   hasAnyData(): boolean {
     if (!isBrowser()) return false

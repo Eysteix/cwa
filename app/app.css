@@ -2,24 +2,21 @@
 
 :root {
   --font-heading: 'Plus Jakarta Sans', sans-serif;
-  --font-body:    'Bricolage Grotesque', sans-serif;
-  --font-mono:    'IBM Plex Mono', monospace;
-
-  --ink:          #27272a;
-  --ink-2:        #52525b;
-  --ink-3:        #a1a1aa;
-  --ink-4:        #e4e4e7;
-  --bg:           #f4f4f5;
-  --surface:      #ffffff;
-  --orange:       #f97316;
-  --orange-dark:  #ea580c;
-  --orange-dim:   #fff7ed;
-  --orange-border:#fed7aa;
-
-  --sh-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
-  --sh-md:  0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
-  --sh-lg:  0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
-
+  --font-body: 'Bricolage Grotesque', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --ink: #27272a;
+  --ink-2: #52525b;
+  --ink-3: #a1a1aa;
+  --ink-4: #e4e4e7;
+  --bg: #f4f4f5;
+  --surface: #ffffff;
+  --orange: #f97316;
+  --orange-dark: #ea580c;
+  --orange-dim: #fff7ed;
+  --orange-border: #fed7aa;
+  --sh-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --sh-md: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --sh-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
   --r: 6px;
 }
 
@@ -27,12 +24,83 @@
 
 body {
   font-family: var(--font-body);
+  font-size: 15px;
   background: var(--bg);
   color: var(--ink);
   margin: 0;
   min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+
+/* ── Focus styles ────────────────────────────────────────────────────────────── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ── Screen-reader only ──────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Responsive layout helpers ───────────────────────────────────────────────── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+  .auth-left-panel {
+    display: none !important;
+  }
+  .auth-right-panel {
+    min-height: 100vh;
+    padding: 48px 32px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  .main-padding {
+    padding: 20px 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
