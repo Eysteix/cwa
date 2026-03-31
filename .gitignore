@@ -6,7 +6,7 @@
 /.react-router/
 /build/
 
-# SQLite
-*.db
-*.db-journal
+# Prisma
+/app/generated/
+
 .vercel
