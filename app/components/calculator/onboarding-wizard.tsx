@@ -61,7 +61,7 @@ export function OnboardingWizard({ yearOptions, semesterOptions, onComplete, onS
             type="text"
             value={university}
             onChange={e => setUniversity(e.target.value)}
-            placeholder="e.g. University of Ghana"
+            placeholder="e.g. KNUST"
             style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 500, width: '100%', background: 'var(--bg)', border: 'none', outline: 'none', padding: '10px 12px', borderRadius: 4, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}
           />
         </div>
@@ -75,7 +75,7 @@ export function OnboardingWizard({ yearOptions, semesterOptions, onComplete, onS
             type="text"
             value={programme}
             onChange={e => setProgramme(e.target.value)}
-            placeholder="e.g. BSc Computer Science"
+            placeholder="e.g. BSc Information Technology"
             style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 500, width: '100%', background: 'var(--bg)', border: 'none', outline: 'none', padding: '10px 12px', borderRadius: 4, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}
           />
         </div>
