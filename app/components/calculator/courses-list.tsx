@@ -26,9 +26,9 @@ export function CoursesList({ courses, onDelete, onUpdateScore, onOpenTarget, on
             <button
               onClick={onArchive}
               style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, color: 'var(--ink-2)', background: 'none', border: '1px solid var(--ink-4)', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}
-              aria-label="Archive this semester's courses"
+              aria-label="Save this semester's courses"
             >
-              Archive
+              Save
             </button>
           )}
           <button onClick={onOpenTarget} style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, color: 'var(--orange)', background: 'none', border: '1px solid var(--orange-border)', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}>

@@ -39,7 +39,7 @@ export function parseContent(raw: string): SiteContent {
   const onboarding = kv('onboarding')
 
   return {
-    site: { name: site.name ?? 'CWA Calculator', tagline: site.tagline ?? '' },
+    site: { name: site.name ?? 'FirstTarget', tagline: site.tagline ?? '' },
     quickTargets: list('quick_targets').map(Number),
     footerLinks: list('footer_links'),
     auth: { heading: auth.heading ?? '', body: auth.body ?? '' },

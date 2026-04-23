@@ -6,7 +6,7 @@ import { getContent } from '~/lib/content'
 import type { Route } from './+types/auth.sign-in'
 
 export function meta(_: Route.MetaArgs) {
-  return [{ title: 'Sign in — CWA Calculator' }]
+  return [{ title: 'Sign in — FirstTarget' }]
 }
 
 export async function loader(_: Route.LoaderArgs) {
@@ -44,9 +44,9 @@ export default function SignInPage() {
       <div className="auth-left-panel" style={panelStyle}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)', backgroundSize: '32px 32px' }} />
         <Link to="/" style={{ position: 'absolute', top: 28, left: 32, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, zIndex: 2 }}>
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 800, color: 'white' }}>CWA</span>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 800, color: 'white' }}>First</span>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Calculator</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target</span>
         </Link>
         <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 380 }}><StudentIllustration /></div>
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginTop: 32 }}>

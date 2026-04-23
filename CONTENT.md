@@ -1,7 +1,7 @@
-# CWA Calculator — Content
+# FirstTarget — Content
 
 ## site
-name: CWA Calculator
+name: FirstTarget
 tagline: Track your academic progress
 
 ## quick_targets

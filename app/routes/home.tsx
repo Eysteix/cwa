@@ -19,7 +19,7 @@ import type { Route } from './+types/home'
 import type { StoredStatus, OnboardingData, StoredSemester } from '~/lib/storage'
 
 export function meta(_: Route.MetaArgs) {
-  return [{ title: 'CWA Calculator' }]
+  return [{ title: 'FirstTarget' }]
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -192,7 +192,7 @@ export default function HomePage() {
   // Unified views
   const status: StoredStatus | null = isLoggedIn
     ? dbStatus
-      ? { inputMode: dbStatus.inputMode as 'cwa' | 'marks', cwa: dbStatus.cwa, totalMarks: dbStatus.totalMarks, totalCredits: dbStatus.totalCredits }
+      ? { inputMode: dbStatus.inputMode as 'cwa' | 'marks' | 'gpa', cwa: dbStatus.cwa, totalMarks: dbStatus.totalMarks, totalCredits: dbStatus.totalCredits }
       : null
     : guestStatus
 
@@ -221,7 +221,7 @@ export default function HomePage() {
       }))
     : guestSemesters
 
-  const showOnboarding = !onboarding?.complete
+  const showOnboarding = isLoggedIn && !onboarding?.complete
   const results = status ? calcResults({ totalMarks: status.totalMarks, totalCredits: status.totalCredits }, courses) : null
   const scenarios = status && courses.length > 0 ? calcScenarios({ totalMarks: status.totalMarks, totalCredits: status.totalCredits }, courses) : []
   const semesterCredits = courses.reduce((s, c) => s + c.credits, 0)
@@ -387,7 +387,7 @@ export default function HomePage() {
               />
             )}
             <AcademicStatusCard initial={status} onSave={handleSaveStatus} />
-            {status && <AddCourseCard onAdd={handleAddCourse} />}
+            {status && <AddCourseCard onAdd={handleAddCourse} mode={status.inputMode} />}
             <SemesterArchive
               semesters={semesters}
               onLoad={handleLoadSemester}
@@ -398,11 +398,29 @@ export default function HomePage() {
           </div>
 
           <div>
+            {!status && (
+              <div style={{ background: 'var(--surface)', borderRadius: 'var(--r)', boxShadow: 'var(--sh-md)', padding: 24, marginBottom: 16, border: '1.5px dashed var(--ink-4)' }}>
+                <div style={{ fontFamily: 'var(--font-heading)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ink-3)', marginBottom: 16 }}>How it works</div>
+                {[
+                  { n: '1', title: 'Enter your current standing', desc: 'Your CWA and total credits so far — from your transcript or student portal.' },
+                  { n: '2', title: 'Add this semester\'s courses', desc: 'Course name, credits, and your expected score for each.' },
+                  { n: '3', title: 'See your projected CWA', desc: 'Your new CWA and what average you need to hit your target.' },
+                ].map(step => (
+                  <div key={step.n} style={{ display: 'flex', gap: 14, marginBottom: 16 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{step.n}</div>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>{step.title}</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>{step.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {status && (
               <>
                 <div className="stats-grid" role="region" aria-label="Academic summary">
                   {[
-                    { val: status.cwa.toFixed(2), lbl: 'CWA', hi: true },
+                    { val: status.cwa.toFixed(2), lbl: status.inputMode === 'gpa' ? 'GPA' : 'CWA', hi: true },
                     { val: String(status.totalCredits), lbl: 'Credits' },
                     { val: status.totalMarks.toLocaleString(), lbl: 'Marks' },
                     { val: String(courses.length), lbl: 'Courses' },
@@ -420,8 +438,8 @@ export default function HomePage() {
                   onOpenTarget={() => setTargetOpen(true)}
                   onArchive={courses.length > 0 ? handleArchiveSemester.bind(null, `Semester ${semesters.length + 1}`) : undefined}
                 />
-                {results && <Results results={results} />}
-                {scenarios.length > 0 && <Scenarios scenarios={scenarios} />}
+                {results && <Results results={results} mode={status.inputMode} />}
+                {scenarios.length > 0 && <Scenarios scenarios={scenarios} mode={status.inputMode} />}
               </>
             )}
           </div>
@@ -437,6 +455,7 @@ export default function HomePage() {
           status={{ totalMarks: status.totalMarks, totalCredits: status.totalCredits }}
           semesterCredits={semesterCredits}
           quickTargets={content.quickTargets}
+          mode={status.inputMode}
         />
       )}
     </div>

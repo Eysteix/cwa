@@ -14,13 +14,13 @@ export function Header() {
         padding: '0 24px', height: 54,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }} aria-label="CWA Calculator home">
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }} aria-label="FirstTarget home">
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.4px' }}>
-            CWA
+            First
           </span>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block', flexShrink: 0 }} aria-hidden="true" />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Calculator
+            Target
           </span>
         </Link>
 

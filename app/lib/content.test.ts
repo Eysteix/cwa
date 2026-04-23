@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { parseContent } from './content'
 
 const sample = `
-# CWA Calculator — Content
+# FirstTarget — Content
 
 ## site
 name: My CWA App

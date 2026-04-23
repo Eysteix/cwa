@@ -30,9 +30,9 @@ export function SemesterArchive({ semesters, onLoad, onDelete, onArchive, hasCur
           <button
             onClick={() => { setArchiving(true); setLabel(`Semester ${semesters.length + 1}`) }}
             style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, color: 'var(--orange)', background: 'none', border: '1px solid var(--orange-border)', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}
-            aria-label="Archive current semester courses"
+            aria-label="Save current semester courses"
           >
-            Archive current
+            Save current
           </button>
         )}
       </div>
@@ -59,7 +59,7 @@ export function SemesterArchive({ semesters, onLoad, onDelete, onArchive, hasCur
           <button
             onClick={() => setArchiving(false)}
             style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--ink-3)', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 6px' }}
-            aria-label="Cancel archiving"
+            aria-label="Cancel saving"
           >
             ✕
           </button>
@@ -68,7 +68,7 @@ export function SemesterArchive({ semesters, onLoad, onDelete, onArchive, hasCur
 
       {semesters.length === 0 && !archiving && (
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--ink-3)', textAlign: 'center', padding: '12px 0', margin: 0 }}>
-          No archived semesters yet.
+          No saved semesters yet.
         </p>
       )}
 

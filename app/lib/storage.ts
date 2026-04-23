@@ -9,7 +9,7 @@ export interface OnboardingData {
 }
 
 export interface StoredStatus {
-  inputMode: 'cwa' | 'marks'
+  inputMode: 'cwa' | 'marks' | 'gpa'
   cwa: number
   totalMarks: number
   totalCredits: number
