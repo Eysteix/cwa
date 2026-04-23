@@ -6,7 +6,6 @@ interface Props {
   initial: StoredStatus | null
   onSave: (status: StoredStatus) => void
 }
-
 export function AcademicStatusCard({ initial, onSave }: Props) {
   const [mode, setMode] = useState<'cwa' | 'marks'>(initial?.inputMode ?? 'cwa')
   const [cwaInput, setCwaInput] = useState(initial?.inputMode === 'cwa' ? String(initial.cwa) : '')
