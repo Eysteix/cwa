@@ -69,6 +69,20 @@ export async function action({ request }: Route.ActionArgs) {
     return { ok: true, course }
   }
 
+  if (intent === 'addCourses') {
+    const coursesJson = formData.get('courses') as string
+    const courses = JSON.parse(coursesJson) as Array<{ name: string; credits: number; score: number }>
+    await db.course.createMany({
+      data: courses.map((course) => ({
+        userId,
+        name: course.name,
+        credits: course.credits,
+        score: course.score,
+      })),
+    })
+    return { ok: true }
+  }
+
   if (intent === 'deleteCourse') {
     const id = formData.get('id') as string
     await db.course.deleteMany({ where: { id, userId } })
@@ -241,15 +255,18 @@ export default function HomePage() {
     }
   }
 
-  function handleAddCourse(course: { name: string; credits: number; score: number }) {
+  function handleAddCourse(coursesToAdd: Array<{ name: string; credits: number; score: number }>) {
+    if (coursesToAdd.length === 0) return
+
     if (isLoggedIn) {
       fetcher.submit(
-        { intent: 'addCourse', name: course.name, credits: String(course.credits), score: String(course.score) },
+        { intent: 'addCourses', courses: JSON.stringify(coursesToAdd) },
         { method: 'post' }
       )
     } else {
-      const newCourse = { ...course, id: String(Date.now()) }
-      const updated = [...guestCourses, newCourse]
+      const now = Date.now()
+      const newCourses = coursesToAdd.map((course, index) => ({ ...course, id: `${now}-${index}` }))
+      const updated = [...guestCourses, ...newCourses]
       setGuestCourses(updated)
       storage.setCourses(updated)
     }
