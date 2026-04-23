@@ -5,21 +5,17 @@ export function Header() {
   const { data: session } = useSession()
 
   return (
-    <header style={{
-      background: '#0a0a0a',
-      position: 'sticky', top: 0, zIndex: 100,
-    }}>
+    <header style={{ background: '#0a0a0a', position: 'sticky', top: 0, zIndex: 100 }}>
       <div style={{
         maxWidth: 1000, margin: '0 auto',
         padding: '0 24px', height: 54,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }} aria-label="FirstTarget home">
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.4px' }}>
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1 }} aria-label="FirstTarget home">
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>
             First
           </span>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block', flexShrink: 0 }} aria-hidden="true" />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18, fontWeight: 800, color: 'var(--orange)', letterSpacing: '-0.5px' }}>
             Target
           </span>
         </Link>
@@ -39,20 +35,12 @@ export function Header() {
               </button>
             </>
           ) : (
-            <>
-              <Link
-                to="/auth/sign-up"
-                style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600, color: '#e4e4e7', background: 'none', border: '1px solid #3f3f46', padding: '6px 14px', borderRadius: 'var(--r)', textDecoration: 'none', display: 'inline-block' }}
-              >
-                Register
-              </Link>
-              <Link
-                to="/auth/sign-in"
-                style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, color: 'white', background: 'var(--orange)', border: 'none', padding: '7px 16px', borderRadius: 'var(--r)', textDecoration: 'none', display: 'inline-block' }}
-              >
-                Sign in
-              </Link>
-            </>
+            <Link
+              to="/auth/sign-in"
+              style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, color: 'white', background: 'var(--orange)', border: 'none', padding: '7px 18px', borderRadius: 'var(--r)', textDecoration: 'none', display: 'inline-block' }}
+            >
+              Sign in
+            </Link>
           )}
         </nav>
       </div>

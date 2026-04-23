@@ -192,7 +192,7 @@ export default function HomePage() {
   // Unified views
   const status: StoredStatus | null = isLoggedIn
     ? dbStatus
-      ? { inputMode: dbStatus.inputMode as 'cwa' | 'marks' | 'gpa', cwa: dbStatus.cwa, totalMarks: dbStatus.totalMarks, totalCredits: dbStatus.totalCredits }
+      ? { inputMode: (dbStatus.inputMode === 'fresh' ? 'cwa' : dbStatus.inputMode) as 'cwa' | 'marks' | 'gpa', cwa: dbStatus.cwa, totalMarks: dbStatus.totalMarks, totalCredits: dbStatus.totalCredits }
       : null
     : guestStatus
 
@@ -222,8 +222,9 @@ export default function HomePage() {
     : guestSemesters
 
   const showOnboarding = isLoggedIn && !onboarding?.complete
+  const isFreshStart = status !== null && status.totalCredits === 0 && status.cwa === 0
   const results = status ? calcResults({ totalMarks: status.totalMarks, totalCredits: status.totalCredits }, courses) : null
-  const scenarios = status && courses.length > 0 ? calcScenarios({ totalMarks: status.totalMarks, totalCredits: status.totalCredits }, courses) : []
+  const scenarios = status && courses.length > 0 && !isFreshStart ? calcScenarios({ totalMarks: status.totalMarks, totalCredits: status.totalCredits }, courses) : []
   const semesterCredits = courses.reduce((s, c) => s + c.credits, 0)
 
   // ── Mutations ────────────────────────────────────────────────────────────────
@@ -420,14 +421,14 @@ export default function HomePage() {
               <>
                 <div className="stats-grid" role="region" aria-label="Academic summary">
                   {[
-                    { val: status.cwa.toFixed(2), lbl: status.inputMode === 'gpa' ? 'GPA' : 'CWA', hi: true },
+                    { val: isFreshStart ? '--' : status.cwa.toFixed(2), lbl: status.inputMode === 'gpa' ? 'CGPA' : 'CWA', hi: true },
                     { val: String(status.totalCredits), lbl: 'Credits' },
                     { val: status.totalMarks.toLocaleString(), lbl: 'Marks' },
                     { val: String(courses.length), lbl: 'Courses' },
                   ].map(({ val, lbl, hi }) => (
                     <div key={lbl} style={{ background: hi ? 'var(--ink)' : 'var(--surface)', borderRadius: 'var(--r)', boxShadow: 'var(--sh-sm)', padding: '12px 8px', textAlign: 'center' }}>
                       <div style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 800, color: hi ? 'var(--orange)' : 'var(--ink)', lineHeight: 1 }}>{val}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.06em', color: hi ? '#71717a' : 'var(--ink-3)', marginTop: 5 }}>{lbl}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: hi ? '#71717a' : 'var(--ink-3)', marginTop: 6 }}>{lbl}</div>
                     </div>
                   ))}
                 </div>
@@ -438,7 +439,7 @@ export default function HomePage() {
                   onOpenTarget={() => setTargetOpen(true)}
                   onArchive={courses.length > 0 ? handleArchiveSemester.bind(null, `Semester ${semesters.length + 1}`) : undefined}
                 />
-                {results && <Results results={results} mode={status.inputMode} />}
+                {results && <Results results={results} mode={status.inputMode} freshStart={isFreshStart} />}
                 {scenarios.length > 0 && <Scenarios scenarios={scenarios} mode={status.inputMode} />}
               </>
             )}

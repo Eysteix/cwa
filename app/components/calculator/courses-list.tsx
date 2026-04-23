@@ -18,7 +18,7 @@ export function CoursesList({ courses, onDelete, onUpdateScore, onOpenTarget, on
 
   return (
     <div style={{ background: 'var(--surface)', borderRadius: 'var(--r)', boxShadow: 'var(--sh-md)', padding: 20, marginBottom: 16 }}>
-      <div style={{ fontFamily: 'var(--font-heading)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', paddingBottom: 12, marginBottom: 4, borderBottom: '2px solid var(--orange)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div style={{ fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', paddingBottom: 12, marginBottom: 4, borderBottom: '2px solid var(--orange)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <span>This Semester</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>{courses.length} course{courses.length !== 1 ? 's' : ''}</span>
@@ -43,7 +43,7 @@ export function CoursesList({ courses, onDelete, onUpdateScore, onOpenTarget, on
           <div key={course.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderTop: '1px solid var(--bg)' }}>
             <div>
               <div style={{ fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 700 }}>{course.name}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginTop: 3 }}>{course.credits} cr · {marks} marks</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)', marginTop: 3 }}>{course.credits} cr · {marks} marks</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <input
